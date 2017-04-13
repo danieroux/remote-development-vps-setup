@@ -2,6 +2,8 @@
 
 set -e
 
+cd $(dirname $0)
+
 if ! [ -e ~/.ssh/id_rsa ]; then 
 	echo "Expect the SSH private key to be copied here manually (it is in brain.org.gpg)"
 	exit 1

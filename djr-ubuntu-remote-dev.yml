@@ -52,6 +52,17 @@
       path: ~/bin
       state: directory
 
+  - name: Copy scripts to ~/bin
+    copy:
+      src: files/bin/
+      dest: ~/bin
+      mode: u+rwx
+      
+  - name: Make ~/source
+    file:
+      path: ~/source
+      state: directory
+
   - name: Download Lein
     get_url:
       url: https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein

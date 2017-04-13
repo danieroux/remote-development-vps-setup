@@ -1,0 +1,3 @@
+#!/bin/bash
+
+emacsclient --tty --socket-name ~/.emacs-server-shared/server $@
