@@ -14,6 +14,11 @@ if ! [ -e ~/.gnupg ]; then
 	exit 1
 fi
 
+if ! [ -e ~/.git-remote-dropbox.json ]; then 
+	echo "Expect the https://github.com/anishathalye/git-remote-dropbox OAuth token to be here (it is in brain.org.gpg)"
+	exit 1
+fi
+
 if ! [ -x "$(command -v ansible-playbook)" ]; then
 	echo "Installing ansible"
 	sudo apt-add-repository ppa:ansible/ansible
