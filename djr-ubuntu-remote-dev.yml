@@ -12,6 +12,7 @@
     with_items:
       - mosh
       - emacs25
+      - default-jdk
     become: true
 
   - name: Set git email
