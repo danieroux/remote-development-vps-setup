@@ -1,0 +1,58 @@
+---
+- hosts: all
+  tasks:
+
+  - name: Add Emacs25 PPA
+    apt_repository: repo='ppa:adrozdoff/emacs'
+    become: true
+
+  - name: Install packages
+    apt:
+      name: "{{ item }}"
+    with_items:
+      - mosh
+      - emacs25
+    become: true
+
+  - name: Set git email
+    git_config:
+      name: user.email
+      value: danie@danieroux.com
+      scope: global
+
+  - name: Set git user
+    git_config:
+      name: user.name
+      value: "Danie Roux"
+      scope: global
+
+  - name: Fetch Emacs configuration
+    git:
+      repo: git@github.com:danieroux/emacs.git
+      accept_hostkey: yes
+      dest: ~/.emacs.d
+      update: no
+  
+  - name: Fetch tmux configuration
+    git:
+      repo: git@github.com:danieroux/tmux-conf.git
+      accept_hostkey: yes
+      dest: ~/.tmux
+      update: no
+  
+  - name: Link tmux configuration
+    file:
+      src: ~/.tmux/tmux.linux.conf
+      dest: ~/.tmux.conf
+      state: link
+
+  - name: Make ~/bin
+    file:
+      path: ~/bin
+      state: directory
+
+  - name: Download Lein
+    get_url:
+      url: https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
+      dest: ~/bin/lein
+      mode: u+rwx
