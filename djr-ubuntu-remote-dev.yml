@@ -1,19 +1,48 @@
 ---
 - hosts: all
+  vars:
+    version: 2015.02.12
+    pkg_path: "/tmp/dropbox-amd64.deb"
+
   tasks:
 
   - name: Add Emacs25 PPA
     apt_repository: repo='ppa:adrozdoff/emacs'
     become: true
 
+  - name: Add isync PPA
+    apt_repository: repo='ppa:slgeorge/ppa'
+    become: true
+
+  - name: Check if dropbox is installed
+    shell: dpkg-query -l dropbox
+    register: dropbox_installed
+    failed_when: dropbox_installed.rc > 1
+  
+  - name: Download dropbox package
+    get_url:
+      url: https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_{{ version }}_amd64.deb
+      dest: "{{ pkg_path }}"
+    register: dropbox_package
+  
+  - name: Install dropbox
+    apt:
+      deb: "{{ pkg_path }}"
+      state: present
+    become: yes
+    when: dropbox_installed.stdout.find('no packages found') != -1 or dropbox_package.changed
+
   - name: Install packages
     apt:
       name: "{{ item }}"
     with_items:
       - mosh
+      - tmux
       - emacs25
       - default-jdk
       - python-pip
+      - python-gpgme
+      - isync
     become: true
 
   - name: Set git email
@@ -69,14 +98,3 @@
       url: https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
       dest: ~/bin/lein
       mode: u+rwx
-
-  # https://github.com/anishathalye/git-remote-dropbox
-  - name: Install git-remote-dropbox
-    pip:
-      name: git-remote-dropbox
-
-  - name: Checkout CAS from Dropbox git repo
-    shell: git clone "dropbox://git_repos/cas" ~/source/cas && cd ~/source/cas && git checkout master
-    args:
-      creates: ~/source/cas
-  
