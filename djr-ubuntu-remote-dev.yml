@@ -3,6 +3,7 @@
   vars:
     version: 2015.02.12
     pkg_path: "/tmp/dropbox-amd64.deb"
+    hugo_pkg_path: "/tmp/hugo-amd64.deb"
 
   tasks:
 
@@ -32,6 +33,24 @@
     become: yes
     when: dropbox_installed.stdout.find('no packages found') != -1 or dropbox_package.changed
 
+  - name: Check if Hugo is installed
+    shell: command -v hugo >/dev/null 2>&1
+    register: hugo_installed
+    ignore_errors: yes
+
+  - name: Download hugo package
+    get_url:
+      url: https://github.com/gohugoio/hugo/releases/download/v0.25/hugo_0.25_Linux-64bit.deb
+      dest: "{{ hugo_pkg_path }}"
+    when: ! hugo_installed
+  
+  - name: Install Hugo from downloaded package
+    apt:
+      deb: "{{ hugo_pkg_path }}"
+      state: present
+    become: yes
+    when: ! hugo_installed
+    
   - name: Install packages
     apt:
       name: "{{ item }}"
@@ -98,3 +117,9 @@
       url: https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
       dest: ~/bin/lein
       mode: u+rwx
+
+  - name: Checkout boim plumbing
+    git:
+        repo: git@github.com:danieroux/boim.git
+        dest: ~/source/boim
+        update: no
